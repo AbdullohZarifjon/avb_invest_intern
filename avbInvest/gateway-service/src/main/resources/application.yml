@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+
+
+        - id: user-service-swagger
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/v3/api-docs, /api/users/swagger-ui.html
+
+
+        - id: company-service
+          uri: lb://company-service
+          predicates:
+            - Path=/api/companies/**
+
+
+        - id: company-service-swagger
+          uri: lb://company-service
+          predicates:
+            - Path=/api/companies/v3/api-docs, /api/companies/swagger-ui.html
+
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka/
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: user-service
+        url: /api/users/v3/api-docs
+      - name: company-service
+        url: /api/companies/v3/api-docs

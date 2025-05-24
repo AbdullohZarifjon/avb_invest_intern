@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+
+  postgres-user-service:
+    image: postgres:latest
+    container_name: postgres-user
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1997
+      POSTGRES_DB: avb_invest
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-user:/var/lib/postgresql/data
+    networks:
+      - avb-net
+
+  postgres-company-service:
+    image: postgres:latest
+    container_name: postgres-company
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1997
+      POSTGRES_DB: avb_invest_company_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata-company:/var/lib/postgresql/data
+    networks:
+      - avb-net
+
+  config-server:
+    build:
+      context: ../config-server
+    image: config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    working_dir: /app
+    command: ["java", "-jar", "config-server.jar"]
+    depends_on:
+      - postgres-user-service
+      - postgres-company-service
+    networks:
+      - avb-net
+
+  eureka-server:
+    build:
+      context: ../eureka-server
+    image: eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - config-server
+    working_dir: /app
+    command: ["java", "-jar", "eureka-server.jar"]
+    networks:
+      - avb-net
+
+  gateway-service:
+    build:
+      context: ../gateway-service
+    image: gateway-service
+    container_name: api-gateway-server
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - eureka-server
+    working_dir: /app
+    command: ["java", "-jar", "api-gateway.jar"]
+    networks:
+      - avb-net
+
+  user-service:
+    build:
+      context: ../user-service
+    image: user-service
+    container_name: user-service-server
+    depends_on:
+      - postgres-user-service
+      - config-server
+      - eureka-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/avb_invest
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1997
+    ports:
+      - "8082:8082"
+    working_dir: /app
+    command: ["java", "-jar", "user-service.jar"]
+    networks:
+      - avb-net
+
+  company-service:
+    build:
+      context: ../company-service
+    image: company-service
+    container_name: company-service-server
+    depends_on:
+      - postgres-company-service
+      - config-server
+      - eureka-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-company:5432/avb_invest_company_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1997
+    ports:
+      - "8081:8081"
+    working_dir: /app
+    command: ["java", "-jar", "company-service.jar"]
+    networks:
+      - avb-net
+
+volumes:
+  pgdata-user:
+  pgdata-company:
+
+networks:
+  avb-net:

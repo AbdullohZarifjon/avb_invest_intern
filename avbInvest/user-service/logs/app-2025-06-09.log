@@ -1,0 +1,22 @@
+2025-06-09 12:19:24 [http-nio-8082-exec-1] INFO  c.e.u.service.UserServiceImpl.getUserById - Fetching user with id=4
+2025-06-09 14:18:24 [http-nio-8082-exec-2] INFO  c.e.u.controller.UserController.getAllUsers - GET /api/users called with page=0, size=5, sortBy=firstName
+2025-06-09 14:18:24 [http-nio-8082-exec-2] INFO  c.e.u.service.UserServiceImpl.getAllUsers - Fetching paginated users: page=0, size=5
+2025-06-09 15:21:22 [http-nio-8082-exec-5] INFO  c.e.u.controller.UserController.getAllUsers - GET /api/users called with page=0, size=5, sortBy=firstName
+2025-06-09 15:21:22 [http-nio-8082-exec-5] INFO  c.e.u.service.UserServiceImpl.getAllUsers - Fetching paginated users: page=0, size=5
+2025-06-09 15:21:31 [http-nio-8082-exec-3] INFO  c.e.u.controller.UserController.getAllUsers - GET /api/users called with page=0, size=10, sortBy=firstName
+2025-06-09 15:21:31 [http-nio-8082-exec-3] INFO  c.e.u.service.UserServiceImpl.getAllUsers - Fetching paginated users: page=0, size=10
+2025-06-09 17:39:45 [http-nio-8082-exec-1] INFO  c.e.u.controller.UserController.getAllUsers - GET /api/users called with page=0, size=10, sortBy=firstName
+2025-06-09 17:39:45 [http-nio-8082-exec-1] INFO  c.e.u.service.UserServiceImpl.getAllUsers - Fetching paginated users: page=0, size=10
+2025-06-09 17:39:46 [http-nio-8082-exec-1] DEBUG c.e.u.service.UserServiceImpl.getAllUsers - Fetched 3 users from DB
+2025-06-09 17:58:42 [http-nio-8082-exec-1] INFO  c.e.u.controller.UserController.getAllUsers - GET /api/users called with page=0, size=10, sortBy=firstName
+2025-06-09 17:58:42 [http-nio-8082-exec-1] INFO  c.e.u.service.UserServiceImpl.getAllUsers - Fetching paginated users: page=0, size=10
+2025-06-09 17:58:42 [http-nio-8082-exec-1] DEBUG c.e.u.service.UserServiceImpl.getAllUsers - Fetched 3 users from DB
+2025-06-09 18:03:32 [http-nio-8082-exec-1] INFO  c.e.u.controller.UserController.getAllUsers - GET /api/users called with page=0, size=10, sortBy=firstName
+2025-06-09 18:03:32 [http-nio-8082-exec-1] INFO  c.e.u.service.UserServiceImpl.getAllUsers - Fetching paginated users: page=0, size=10
+2025-06-09 18:03:32 [http-nio-8082-exec-1] DEBUG c.e.u.service.UserServiceImpl.getAllUsers - Fetched 3 users from DB
+2025-06-09 18:18:50 [http-nio-8082-exec-1] INFO  c.e.u.controller.UserController.getAllUsers - GET /api/users called with page=0, size=10, sortBy=firstName
+2025-06-09 18:18:50 [http-nio-8082-exec-1] INFO  c.e.u.service.UserServiceImpl.getAllUsers - Fetching paginated users: page=0, size=10
+2025-06-09 18:18:50 [http-nio-8082-exec-1] DEBUG c.e.u.service.UserServiceImpl.getAllUsers - Fetched 3 users from DB
+2025-06-09 18:19:46 [http-nio-8082-exec-1] INFO  c.e.u.controller.UserController.getAllUsers - GET /api/users called with page=0, size=10, sortBy=firstName
+2025-06-09 18:19:46 [http-nio-8082-exec-1] INFO  c.e.u.service.UserServiceImpl.getAllUsers - Fetching paginated users: page=0, size=10
+2025-06-09 18:19:46 [http-nio-8082-exec-1] DEBUG c.e.u.service.UserServiceImpl.getAllUsers - Fetched 3 users from DB

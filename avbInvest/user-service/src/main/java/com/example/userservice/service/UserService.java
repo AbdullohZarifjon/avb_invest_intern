@@ -1,25 +1,26 @@
 package com.example.userservice.service;
 
 import com.example.userservice.dto.UserCreateDto;
-import com.example.userservice.dto.UserGetAllDto;
+import com.example.userservice.dto.UserGetAllComponentsDto;
 import com.example.userservice.dto.UserResponseDto;
-import com.example.userservice.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface UserService {
 
-    User createUser(UserCreateDto userCreateDto);
+    UserGetAllComponentsDto createUser(UserCreateDto userCreateDto);
 
-    UserGetAllDto getUserById(Integer userId);
+    UserGetAllComponentsDto getUserById(Integer userId);
 
-    User updateUser(Integer id, UserCreateDto userCreateDto);
+    UserGetAllComponentsDto updateUser(Integer id, UserCreateDto userCreateDto);
 
     void deleteUserById(Integer userId);
 
     void deleteUsersByCompanyId(Integer companyId);
 
-    List<UserGetAllDto> getAllUsers();
+    Page<UserGetAllComponentsDto> getAllUsers(Pageable pageable);
 
     List<UserResponseDto> getUserByCompanyId(Integer id);
 }

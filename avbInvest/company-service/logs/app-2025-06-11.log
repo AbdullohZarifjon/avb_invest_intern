@@ -1,0 +1,3 @@
+2025-06-11 19:26:30 [http-nio-8081-exec-1] INFO  c.e.c.service.CompanyServiceImpl.getCompanyByIdWithoutUsers - Fetching company without users with id: 3
+2025-06-11 19:32:47 [http-nio-8081-exec-3] INFO  c.e.c.service.CompanyServiceImpl.getCompanyById - Fetching company with id: 4
+2025-06-11 19:32:47 [http-nio-8081-exec-3] DEBUG c.e.c.service.CompanyServiceImpl.getCompanyById - Company: avb, Users count: 0

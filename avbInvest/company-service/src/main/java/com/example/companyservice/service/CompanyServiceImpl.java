@@ -1,5 +1,6 @@
 package com.example.companyservice.service;
 
+import com.example.companyservice.client.UserServiceClient;
 import com.example.companyservice.dto.CompanyDto;
 import com.example.companyservice.dto.CompanyGetDto;
 import com.example.companyservice.dto.CompanyResponseDto;
@@ -7,33 +8,36 @@ import com.example.companyservice.dto.UserResponseDto;
 import com.example.companyservice.entity.Company;
 import com.example.companyservice.exps.RecordAlreadyException;
 import com.example.companyservice.exps.RecordNotFoundException;
+import com.example.companyservice.mapper.CompanyMapper;
 import com.example.companyservice.repo.CompanyRepository;
-import org.springframework.core.ParameterizedTypeReference;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository companyRepository;
-    private final RestTemplate restTemplate;
+    private final UserServiceClient userServiceClient;
 
-    public CompanyServiceImpl(CompanyRepository companyRepository, RestTemplate restTemplate) {
+    public CompanyServiceImpl(CompanyRepository companyRepository, UserServiceClient userServiceClient) {
         this.companyRepository = companyRepository;
-        this.restTemplate = restTemplate;
+        this.userServiceClient = userServiceClient;
     }
 
     @Override
-    public Company createCompany(CompanyDto companyDto) {
+    public CompanyGetDto createCompany(CompanyDto companyDto) {
+        log.info("Creating company with name: {}", companyDto.getName());
+
         Optional<Company> existingCompany = companyRepository.findByName(companyDto.getName());
         if (existingCompany.isPresent()) {
+            log.warn("Company with name '{}' already exists", companyDto.getName());
             throw new RecordAlreadyException("Company already exists");
         }
 
@@ -42,72 +46,85 @@ public class CompanyServiceImpl implements CompanyService {
                 .budget(companyDto.getBudget())
                 .build();
 
-        return companyRepository.save(company);
+        Company saved = companyRepository.save(company);
+        log.info("Company saved with id: {}", saved.getId());
+
+        return CompanyMapper.toDto(saved);
     }
 
     @Override
     public CompanyResponseDto getCompanyById(Integer companyId) {
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new RecordNotFoundException("Company not found"));
-        String url = "http://user-service/api/users/company/" + companyId;
-        System.out.println("companyId: " + company);
-        ResponseEntity<List<UserResponseDto>> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<UserResponseDto>>() {
-                }
-        );
-        List<UserResponseDto> users = response.getBody();
-        return CompanyResponseDto.builder()
-                .id(company.getId())
-                .name(company.getName())
-                .budget(company.getBudget())
-                .users(users)
-                .build();
+        log.info("Fetching company with id: {}", companyId);
+
+        Company company = getCompanyOrThrow(companyId);
+        List<UserResponseDto> users = userServiceClient.getUsersByCompanyId(companyId);
+
+        log.debug("Company: {}, Users count: {}", company.getName(), users.size());
+
+        return CompanyMapper.toDto(users, company);
     }
 
     @Override
-    public Company updateCompany(Integer id, CompanyDto companyDto) {
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException("Company not found"));
+    public CompanyGetDto updateCompany(Integer id, CompanyDto companyDto) {
+        log.info("Updating company with id: {}", id);
 
+        Company company = getCompanyOrThrow(id);
         company.setName(companyDto.getName());
         company.setBudget(companyDto.getBudget());
 
         try {
-            return companyRepository.save(company);
+            Company updated = companyRepository.save(company);
+            log.info("Company updated successfully: {}", updated.getId());
+            return CompanyMapper.toDto(updated);
         } catch (DataIntegrityViolationException e) {
+            log.error("Update failed. Duplicate name: {}", companyDto.getName(), e);
             throw new RecordAlreadyException("Company with this name already exists");
         }
     }
 
     @Override
     public void deleteCompanyById(Integer companyId) {
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new RecordNotFoundException("Company not found"));
+        log.info("Deleting company with id: {}", companyId);
 
-        String url = "http://user-service/api/users/company/" + companyId;
-        restTemplate.delete(url);
-
+        Company company = getCompanyOrThrow(companyId);
+        userServiceClient.deleteUsersByCompanyId(companyId);
         companyRepository.delete(company);
+
+        log.info("Company deleted successfully: {}", companyId);
     }
 
     @Override
-    public List<CompanyResponseDto> getAllCompanies() {
-        List<Company> companies = companyRepository.findAll();
+    public Page<CompanyResponseDto> getAllCompanies(Pageable pageable) {
+        log.info("Fetching paginated companies: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
 
-        return companies.stream().map(company -> getCompanyById(company.getId())).collect(Collectors.toList());
+        Page<Company> companies = companyRepository.findAll(pageable);
+        log.debug("Fetched {} companies from DB", companies.getTotalElements());
+
+        return companies.map(company -> {
+            log.debug("Mapping company with id={}, name={}", company.getId(), company.getName());
+            List<UserResponseDto> users;
+            try {
+                users = userServiceClient.getUsersByCompanyId(company.getId());
+                log.debug("Fetched {} users for company id={}", users.size(), company.getId());
+            } catch (Exception e) {
+                log.error("Failed to fetch users for company id={}. Error: {}", company.getId(), e.getMessage());
+                users = List.of(); // fallback to empty list
+            }
+
+            return CompanyMapper.toDto(users, company);
+        });
     }
+
 
     @Override
     public CompanyGetDto getCompanyByIdWithoutUsers(Integer id) {
-        Company company = companyRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Company not found"));
+        log.info("Fetching company without users with id: {}", id);
+        Company company = getCompanyOrThrow(id);
+        return CompanyMapper.toDto(company);
+    }
 
-        return CompanyGetDto.builder()
-                .id(company.getId())
-                .name(company.getName())
-                .budget(company.getBudget())
-                .build();
+    private Company getCompanyOrThrow(Integer id) {
+        return companyRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException("Company not found"));
     }
 }

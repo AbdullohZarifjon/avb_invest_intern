@@ -5,10 +5,10 @@ import lombok.Value;
 
 @Value
 @Builder
-public class UserResponseDto {
+public class UserGetAllComponentsDto {
     Integer id;
     String firstName;
     String lastName;
     String phoneNumber;
-    Integer companyId;
+    CompanyResponseDto company;
 }

@@ -1,38 +1,44 @@
 package com.example.userservice.service;
 
+import com.example.userservice.client.CompanyServiceClient;
 import com.example.userservice.dto.CompanyResponseDto;
 import com.example.userservice.dto.UserCreateDto;
-import com.example.userservice.dto.UserGetAllDto;
+import com.example.userservice.dto.UserGetAllComponentsDto;
 import com.example.userservice.dto.UserResponseDto;
 import com.example.userservice.entity.User;
 import com.example.userservice.exps.RecordAlreadyException;
 import com.example.userservice.exps.RecordNotFoundException;
+import com.example.userservice.mapper.UserMapper;
 import com.example.userservice.repo.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final RestTemplate restTemplate;
+    private final CompanyServiceClient companyServiceClient;
 
-    public UserServiceImpl(UserRepository userRepository, RestTemplate restTemplate) {
+    public UserServiceImpl(UserRepository userRepository, CompanyServiceClient companyServiceClient) {
         this.userRepository = userRepository;
-        this.restTemplate = restTemplate;
+        this.companyServiceClient = companyServiceClient;
     }
 
     @Override
-    public User createUser(UserCreateDto userCreateDto) {
-        Optional<User> userByPhoneNumber = userRepository.getUserByPhoneNumber(userCreateDto.getPhoneNumber());
-        if (userByPhoneNumber.isPresent()) {
+    public UserGetAllComponentsDto createUser(UserCreateDto userCreateDto) {
+        log.info("Creating user: {}", userCreateDto.getPhoneNumber());
+
+        if (userRepository.getUserByPhoneNumber(userCreateDto.getPhoneNumber()).isPresent()) {
+            log.warn("User with phoneNumber={} already exists", userCreateDto.getPhoneNumber());
             throw new RecordAlreadyException("User already exists");
         }
+
         User user = User.builder()
                 .firstName(userCreateDto.getFirstName())
                 .lastName(userCreateDto.getLastName())
@@ -40,82 +46,103 @@ public class UserServiceImpl implements UserService {
                 .companyId(userCreateDto.getCompanyId())
                 .build();
 
-        return userRepository.save(user);
+        userRepository.save(user);
+        log.debug("User saved: {}", user.getId());
+
+
+        CompanyResponseDto companyResponseDto = companyServiceClient.getCompanyById(user.getCompanyId());
+        return UserMapper.toDto(user, companyResponseDto);
     }
 
     @Override
-    public UserGetAllDto getUserById(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+    public UserGetAllComponentsDto getUserById(Integer userId) {
+        log.info("Fetching user with ID: {}", userId);
 
-        return UserGetAllDto.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .phoneNumber(user.getPhoneNumber())
-                .company(getCompanyById(user.getCompanyId()))
-                .build();
+        User user = getUserOrThrow(userId);
+
+        CompanyResponseDto companyResponseDto = companyServiceClient.getCompanyById(user.getCompanyId());
+        return UserMapper.toDto(user, companyResponseDto);
     }
 
-
     @Override
-    public User updateUser(Integer id, UserCreateDto userCreateDto) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+    public UserGetAllComponentsDto updateUser(Integer id, UserCreateDto userCreateDto) {
+        log.info("Updating user with ID: {}, New Data: {}", id, userCreateDto.getPhoneNumber());
+
+        User user = getUserOrThrow(id);
 
         user.setFirstName(userCreateDto.getFirstName());
         user.setLastName(userCreateDto.getLastName());
         user.setPhoneNumber(userCreateDto.getPhoneNumber());
         user.setCompanyId(userCreateDto.getCompanyId());
+
         try {
-            return userRepository.save(user);
+            userRepository.save(user);
+            log.debug("User with ID {} updated successfully in DB:", id);
         } catch (DataIntegrityViolationException e) {
-            throw new RecordAlreadyException("This is phone number already exists");
+            log.warn("Duplicate phone number {} for user ID {}", userCreateDto.getPhoneNumber(), id);
+            throw new RecordAlreadyException("This phone number already exists");
         }
+
+        CompanyResponseDto companyResponseDto = companyServiceClient.getCompanyById(user.getCompanyId());
+
+        return UserMapper.toDto(user, companyResponseDto);
     }
 
     @Override
     public void deleteUserById(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+        log.info("Deleting user with id={}", userId);
+
+        User user = getUserOrThrow(userId);
 
         userRepository.delete(user);
+        log.warn("User with id={} deleted", userId);
     }
 
     @Override
     public void deleteUsersByCompanyId(Integer companyId) {
-        userRepository.deleteUsersByCompanyId(companyId);
+        log.info("Deleting users by companyId={}", companyId);
+
+        try {
+            companyServiceClient.getCompanyById(companyId);
+        } catch (RecordNotFoundException e) {
+            log.warn("Company with ID {} not found. Skipping user deletion.", companyId);
+            return;
+        }
+
+        int deletedCount = userRepository.deleteUsersByCompanyId(companyId);
+        log.warn("Deleted {} users with companyId={}", deletedCount, companyId);
     }
 
     @Override
-    public List<UserGetAllDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
+    public Page<UserGetAllComponentsDto> getAllUsers(Pageable pageable) {
+        log.info("Fetching paginated users: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
 
-        return users.stream().map(user -> UserGetAllDto.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .phoneNumber(user.getPhoneNumber())
-                .company(getCompanyById(user.getCompanyId()))
-                .build()).collect(Collectors.toList());
+        Page<User> users = userRepository.findAll(pageable);
+        log.debug("Fetched {} users from DB", users.getTotalElements());
+
+        return users.map(user -> {
+            CompanyResponseDto company = companyServiceClient.getCompanyById(user.getCompanyId());
+            return UserMapper.toDto(user, company);
+        });
     }
 
     @Override
     public List<UserResponseDto> getUserByCompanyId(Integer id) {
+        log.info("Fetching users by companyId={}", id);
+
         List<User> users = userRepository.getUsersByCompanyId(id);
-        return users.stream().map(user -> UserResponseDto.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .phoneNumber(user.getPhoneNumber())
-                .build()).toList();
+        log.debug("Found {} users for companyId={}", users.size(), id);
+
+        return users.stream().map(UserMapper::toDto).toList();
 
     }
 
-
-    private CompanyResponseDto getCompanyById(Integer id) {
-        String url = "http://company-service/api/companies/user/" + id;
-        return restTemplate.getForObject(url, CompanyResponseDto.class);
+    private User getUserOrThrow(Integer id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("User not found with id={}", id);
+                    return new RecordNotFoundException("User not found with id: " + id);
+                });
     }
 
 }

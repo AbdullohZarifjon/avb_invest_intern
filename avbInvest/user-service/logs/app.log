@@ -1,0 +1,18 @@
+2025-06-12 20:06:59 [http-nio-8082-exec-1] INFO  c.e.u.controller.UserController.getUsersByCompanyId - Fetching users for company ID: 4
+2025-06-12 20:06:59 [http-nio-8082-exec-1] INFO  c.e.u.service.UserServiceImpl.getUserByCompanyId - Fetching users by companyId=4
+2025-06-12 20:07:00 [http-nio-8082-exec-1] DEBUG c.e.u.service.UserServiceImpl.getUserByCompanyId - Found 0 users for companyId=4
+2025-06-12 20:07:39 [http-nio-8082-exec-2] INFO  c.e.u.controller.UserController.getUsersByCompanyId - Fetching users for company ID: 5
+2025-06-12 20:07:39 [http-nio-8082-exec-2] INFO  c.e.u.service.UserServiceImpl.getUserByCompanyId - Fetching users by companyId=5
+2025-06-12 20:07:39 [http-nio-8082-exec-2] DEBUG c.e.u.service.UserServiceImpl.getUserByCompanyId - Found 0 users for companyId=5
+2025-06-12 20:07:39 [http-nio-8082-exec-3] INFO  c.e.u.controller.UserController.getUsersByCompanyId - Fetching users for company ID: 4
+2025-06-12 20:07:39 [http-nio-8082-exec-3] INFO  c.e.u.service.UserServiceImpl.getUserByCompanyId - Fetching users by companyId=4
+2025-06-12 20:07:39 [http-nio-8082-exec-3] DEBUG c.e.u.service.UserServiceImpl.getUserByCompanyId - Found 0 users for companyId=4
+2025-06-12 20:07:39 [http-nio-8082-exec-4] INFO  c.e.u.controller.UserController.getUsersByCompanyId - Fetching users for company ID: 3
+2025-06-12 20:07:39 [http-nio-8082-exec-4] INFO  c.e.u.service.UserServiceImpl.getUserByCompanyId - Fetching users by companyId=3
+2025-06-12 20:07:39 [http-nio-8082-exec-4] DEBUG c.e.u.service.UserServiceImpl.getUserByCompanyId - Found 1 users for companyId=3
+2025-06-12 20:07:39 [http-nio-8082-exec-5] INFO  c.e.u.controller.UserController.getUsersByCompanyId - Fetching users for company ID: 1
+2025-06-12 20:07:39 [http-nio-8082-exec-5] INFO  c.e.u.service.UserServiceImpl.getUserByCompanyId - Fetching users by companyId=1
+2025-06-12 20:07:39 [http-nio-8082-exec-5] DEBUG c.e.u.service.UserServiceImpl.getUserByCompanyId - Found 2 users for companyId=1
+2025-06-12 20:10:51 [http-nio-8082-exec-7] INFO  c.e.u.controller.UserController.getUsersByCompanyId - Fetching users for company ID: 4
+2025-06-12 20:10:51 [http-nio-8082-exec-7] INFO  c.e.u.service.UserServiceImpl.getUserByCompanyId - Fetching users by companyId=4
+2025-06-12 20:10:51 [http-nio-8082-exec-7] DEBUG c.e.u.service.UserServiceImpl.getUserByCompanyId - Found 0 users for companyId=4

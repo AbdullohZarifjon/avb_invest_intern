@@ -6,15 +6,19 @@ import com.example.companyservice.dto.CompanyResponseDto;
 import com.example.companyservice.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/api/companies")
 public class CompanyController {
@@ -28,64 +32,52 @@ public class CompanyController {
     @PostMapping
     @Operation(summary = "Create a new company")
     public CompanyGetDto addCompany(@Valid @RequestBody CompanyDto companyDto) {
-        log.info("Received request to create company: name='{}', budget={}",
-                companyDto.getName(), companyDto.getBudget());
-        CompanyGetDto createdCompany = companyService.createCompany(companyDto);
-        log.info("Company created successfully with id={}", createdCompany.getId());
-        return createdCompany;
+        log.info("Received request to create company: name='{}'", companyDto.getName());
+        return companyService.createCompany(companyDto);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get company with users by ID")
-    public CompanyResponseDto getCompanyById(@PathVariable Integer id) {
+    public CompanyResponseDto getCompanyById(@PathVariable @Min(1) Integer id) {
         log.info("Received request to fetch company with users. ID={}", id);
-        CompanyResponseDto response = companyService.getCompanyById(id);
-        log.info("Successfully fetched company '{}'", response.getName());
-        return response;
+        return companyService.getCompanyById(id);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update existing company")
-    public CompanyGetDto updateCompany(@PathVariable Integer id,
+    public CompanyGetDto updateCompany(@PathVariable @Min(1) Integer id,
                                        @Valid @RequestBody CompanyDto companyDto) {
-        log.info("Received request to update company with id={}", id);
-        CompanyGetDto updatedCompany = companyService.updateCompany(id, companyDto);
-        log.info("Company updated successfully: id={}, name={}", updatedCompany.getId(), updatedCompany.getName());
-        return updatedCompany;
+        log.info("Update request for company ID={}", id);
+        return companyService.updateCompany(id, companyDto);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete company by ID")
-    public ResponseEntity<Void> deleteCompany(@PathVariable Integer id) {
-        log.info("Received request to delete company with id={}", id);
+    public ResponseEntity<Void> deleteCompany(@PathVariable @Min(1) Integer id) {
+        log.warn("Delete request received for company ID={}", id);
         companyService.deleteCompanyById(id);
-        log.info("Company deleted successfully with id={}", id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     @Operation(summary = "Get paginated list of all companies")
     public Page<CompanyResponseDto> getAllCompanies(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size,
+            @RequestParam(defaultValue = "id") @Pattern(regexp = "id|name|budget") String sortBy
     ) {
         log.info("Received request to get all companies with pagination: page={}, size={}, sortBy={}",
                 page, size, sortBy);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        Page<CompanyResponseDto> companies = companyService.getAllCompanies(pageable);
 
-        log.info("Returning {} companies", companies.getTotalElements());
-        return companies;
+        return companyService.getAllCompanies(pageable);
     }
 
     @GetMapping("/user/{id}")
     @Operation(summary = "Get company by ID (without users)")
-    public CompanyGetDto getCompanyByCompanyId(@PathVariable Integer id) {
+    public CompanyGetDto getCompanyByCompanyId(@PathVariable("id") @Min(1) Integer id) {
         log.info("Received request to fetch company without users. ID={}", id);
-        CompanyGetDto company = companyService.getCompanyByIdWithoutUsers(id);
-        log.info("Successfully fetched company '{}'", company.getName());
-        return company;
+        return companyService.getCompanyByIdWithoutUsers(id);
     }
 }

@@ -32,12 +32,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserGetAllComponentsDto createUser(UserCreateDto userCreateDto) {
-        log.info("Creating user: {}", userCreateDto.getPhoneNumber());
-
-        if (userRepository.getUserByPhoneNumber(userCreateDto.getPhoneNumber()).isPresent()) {
-            log.warn("User with phoneNumber={} already exists", userCreateDto.getPhoneNumber());
-            throw new RecordAlreadyException("User already exists");
-        }
+        checkUserPhoneNumberUniqueness(userCreateDto.getPhoneNumber());
 
         User user = User.builder()
                 .firstName(userCreateDto.getFirstName())
@@ -47,8 +42,7 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         userRepository.save(user);
-        log.debug("User saved: {}", user.getId());
-
+        log.info("User saved: {}", user.getId());
 
         CompanyResponseDto companyResponseDto = companyServiceClient.getCompanyById(user.getCompanyId());
         return UserMapper.toDto(user, companyResponseDto);
@@ -56,18 +50,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserGetAllComponentsDto getUserById(Integer userId) {
-        log.info("Fetching user with ID: {}", userId);
-
         User user = getUserOrThrow(userId);
 
         CompanyResponseDto companyResponseDto = companyServiceClient.getCompanyById(user.getCompanyId());
+        log.info("Fetching user with ID: {}", userId);
         return UserMapper.toDto(user, companyResponseDto);
     }
 
     @Override
     public UserGetAllComponentsDto updateUser(Integer id, UserCreateDto userCreateDto) {
-        log.info("Updating user with ID: {}, New Data: {}", id, userCreateDto.getPhoneNumber());
-
         User user = getUserOrThrow(id);
 
         user.setFirstName(userCreateDto.getFirstName());
@@ -84,14 +75,11 @@ public class UserServiceImpl implements UserService {
         }
 
         CompanyResponseDto companyResponseDto = companyServiceClient.getCompanyById(user.getCompanyId());
-
         return UserMapper.toDto(user, companyResponseDto);
     }
 
     @Override
     public void deleteUserById(Integer userId) {
-        log.info("Deleting user with id={}", userId);
-
         User user = getUserOrThrow(userId);
 
         userRepository.delete(user);
@@ -100,8 +88,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUsersByCompanyId(Integer companyId) {
-        log.info("Deleting users by companyId={}", companyId);
-
         try {
             companyServiceClient.getCompanyById(companyId);
         } catch (RecordNotFoundException e) {
@@ -115,10 +101,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserGetAllComponentsDto> getAllUsers(Pageable pageable) {
-        log.info("Fetching paginated users: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
-
         Page<User> users = userRepository.findAll(pageable);
-        log.debug("Fetched {} users from DB", users.getTotalElements());
+        log.info("Fetched {} users from DB", users.getTotalElements());
 
         return users.map(user -> {
             CompanyResponseDto company = companyServiceClient.getCompanyById(user.getCompanyId());
@@ -128,11 +112,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> getUserByCompanyId(Integer id) {
-        log.info("Fetching users by companyId={}", id);
-
         List<User> users = userRepository.getUsersByCompanyId(id);
-        log.debug("Found {} users for companyId={}", users.size(), id);
-
         return users.stream().map(UserMapper::toDto).toList();
 
     }
@@ -140,9 +120,15 @@ public class UserServiceImpl implements UserService {
     private User getUserOrThrow(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("User not found with id={}", id);
+                    log.error("User lookup failed. id={} not found in DB", id);
                     return new RecordNotFoundException("User not found with id: " + id);
                 });
     }
 
+    private void checkUserPhoneNumberUniqueness(String phoneNumber) {
+        if (userRepository.getUserByPhoneNumber(phoneNumber).isPresent()) {
+            log.warn("Attempted to create user with existing phoneNumber=*** (masked)");
+            throw new RecordAlreadyException("User already exists");
+        }
+    }
 }

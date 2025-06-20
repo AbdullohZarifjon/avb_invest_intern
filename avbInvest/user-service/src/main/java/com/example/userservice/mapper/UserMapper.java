@@ -5,9 +5,16 @@ import com.example.userservice.dto.UserGetAllComponentsDto;
 import com.example.userservice.dto.UserResponseDto;
 import com.example.userservice.entity.User;
 
+
 public class UserMapper {
 
     public static UserGetAllComponentsDto toDto(User user, CompanyResponseDto companyDto) {
+        if ( user == null) {
+            return null;
+        }
+        if (companyDto == null) {
+            companyDto = CompanyResponseDto.builder().build();
+        }
         return UserGetAllComponentsDto.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())
@@ -18,6 +25,9 @@ public class UserMapper {
     }
 
     public static UserResponseDto toDto(User user) {
+        if ( user == null) {
+            return null;
+        }
         return UserResponseDto.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())

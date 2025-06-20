@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -33,13 +32,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public CompanyGetDto createCompany(CompanyDto companyDto) {
-        log.info("Creating company with name: {}", companyDto.getName());
-
-        Optional<Company> existingCompany = companyRepository.findByName(companyDto.getName());
-        if (existingCompany.isPresent()) {
-            log.warn("Company with name '{}' already exists", companyDto.getName());
-            throw new RecordAlreadyException("Company already exists");
-        }
+        checkCompanyNameUniqueness(companyDto.getName());
 
         Company company = Company.builder()
                 .name(companyDto.getName())
@@ -54,20 +47,16 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public CompanyResponseDto getCompanyById(Integer companyId) {
-        log.info("Fetching company with id: {}", companyId);
 
         Company company = getCompanyOrThrow(companyId);
         List<UserResponseDto> users = userServiceClient.getUsersByCompanyId(companyId);
 
-        log.debug("Company: {}, Users count: {}", company.getName(), users.size());
-
+        log.info("Company: id={}, Users count: {}", company.getId(), users.size());
         return CompanyMapper.toDto(users, company);
     }
 
     @Override
     public CompanyGetDto updateCompany(Integer id, CompanyDto companyDto) {
-        log.info("Updating company with id: {}", id);
-
         Company company = getCompanyOrThrow(id);
         company.setName(companyDto.getName());
         company.setBudget(companyDto.getBudget());
@@ -84,37 +73,30 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public void deleteCompanyById(Integer companyId) {
-        log.info("Deleting company with id: {}", companyId);
-
         Company company = getCompanyOrThrow(companyId);
         userServiceClient.deleteUsersByCompanyId(companyId);
         companyRepository.delete(company);
 
-        log.info("Company deleted successfully: {}", companyId);
+        log.warn("Deleted company with id={}", companyId);
     }
 
     @Override
     public Page<CompanyResponseDto> getAllCompanies(Pageable pageable) {
-        log.info("Fetching paginated companies: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
-
         Page<Company> companies = companyRepository.findAll(pageable);
-        log.debug("Fetched {} companies from DB", companies.getTotalElements());
 
         return companies.map(company -> {
-            log.debug("Mapping company with id={}, name={}", company.getId(), company.getName());
             List<UserResponseDto> users;
             try {
                 users = userServiceClient.getUsersByCompanyId(company.getId());
                 log.debug("Fetched {} users for company id={}", users.size(), company.getId());
             } catch (Exception e) {
                 log.error("Failed to fetch users for company id={}. Error: {}", company.getId(), e.getMessage());
-                users = List.of(); // fallback to empty list
+                users = List.of();
             }
 
             return CompanyMapper.toDto(users, company);
         });
     }
-
 
     @Override
     public CompanyGetDto getCompanyByIdWithoutUsers(Integer id) {
@@ -125,6 +107,14 @@ public class CompanyServiceImpl implements CompanyService {
 
     private Company getCompanyOrThrow(Integer id) {
         return companyRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException("Company not found"));
+                .orElseThrow(() -> new RecordNotFoundException("Company not found with id=" + id));
     }
+
+    private void checkCompanyNameUniqueness(String companyName) {
+        if (companyRepository.findByName(companyName).isPresent()) {
+            log.warn("Company with name '{}' already exists", companyName);
+            throw new RecordAlreadyException("Company already exists");
+        }
+    }
+
 }

@@ -26,4 +26,6 @@ public class CompanyServiceClient {
             throw new RecordNotFoundException("Failed to fetch company with id: " + companyId);
         }
     }
+
+
 }

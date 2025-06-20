@@ -1,0 +1,37 @@
+2025-06-16 18:11:42 [http-nio-8081-exec-1] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Received request to fetch company without users. ID=1
+2025-06-16 18:11:42 [http-nio-8081-exec-1] INFO  c.e.c.service.CompanyServiceImpl.getCompanyByIdWithoutUsers - Fetching company without users with id: 1
+2025-06-16 18:11:43 [http-nio-8081-exec-1] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Successfully fetched company 'PDP'
+2025-06-16 18:11:43 [http-nio-8081-exec-2] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Received request to fetch company without users. ID=3
+2025-06-16 18:11:43 [http-nio-8081-exec-2] INFO  c.e.c.service.CompanyServiceImpl.getCompanyByIdWithoutUsers - Fetching company without users with id: 3
+2025-06-16 18:11:43 [http-nio-8081-exec-2] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Successfully fetched company 'Mohir Dev'
+2025-06-16 18:11:43 [http-nio-8081-exec-3] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Received request to fetch company without users. ID=1
+2025-06-16 18:11:43 [http-nio-8081-exec-3] INFO  c.e.c.service.CompanyServiceImpl.getCompanyByIdWithoutUsers - Fetching company without users with id: 1
+2025-06-16 18:11:43 [http-nio-8081-exec-3] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Successfully fetched company 'PDP'
+2025-06-16 19:32:06 [http-nio-8081-exec-5] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Received request to fetch company without users. ID=1
+2025-06-16 19:32:06 [http-nio-8081-exec-5] INFO  c.e.c.service.CompanyServiceImpl.getCompanyByIdWithoutUsers - Fetching company without users with id: 1
+2025-06-16 19:32:06 [http-nio-8081-exec-5] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Successfully fetched company 'PDP'
+2025-06-16 19:32:06 [http-nio-8081-exec-10] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Received request to fetch company without users. ID=3
+2025-06-16 19:32:06 [http-nio-8081-exec-10] INFO  c.e.c.service.CompanyServiceImpl.getCompanyByIdWithoutUsers - Fetching company without users with id: 3
+2025-06-16 19:32:06 [http-nio-8081-exec-10] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Successfully fetched company 'Mohir Dev'
+2025-06-16 19:32:06 [http-nio-8081-exec-7] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Received request to fetch company without users. ID=1
+2025-06-16 19:32:06 [http-nio-8081-exec-7] INFO  c.e.c.service.CompanyServiceImpl.getCompanyByIdWithoutUsers - Fetching company without users with id: 1
+2025-06-16 19:32:06 [http-nio-8081-exec-7] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Successfully fetched company 'PDP'
+2025-06-16 19:46:49 [http-nio-8081-exec-9] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Received request to fetch company without users. ID=3
+2025-06-16 19:46:49 [http-nio-8081-exec-9] INFO  c.e.c.service.CompanyServiceImpl.getCompanyByIdWithoutUsers - Fetching company without users with id: 3
+2025-06-16 19:46:49 [http-nio-8081-exec-9] INFO  c.e.c.controller.CompanyController.getCompanyByCompanyId - Successfully fetched company 'Mohir Dev'
+2025-06-16 19:47:14 [http-nio-8081-exec-6] INFO  c.e.c.controller.CompanyController.getAllCompanies - Received request to get all companies with pagination: page=0, size=10, sortBy=name
+2025-06-16 19:47:14 [http-nio-8081-exec-6] INFO  c.e.c.service.CompanyServiceImpl.getAllCompanies - Fetching paginated companies: page=0, size=10
+2025-06-16 19:47:14 [http-nio-8081-exec-6] DEBUG c.e.c.service.CompanyServiceImpl.getAllCompanies - Fetched 4 companies from DB
+2025-06-16 19:47:14 [http-nio-8081-exec-6] DEBUG c.e.c.service.CompanyServiceImpl.lambda$getAllCompanies$0 - Mapping company with id=5, name=Astrum
+2025-06-16 19:47:14 [http-nio-8081-exec-6] DEBUG c.e.c.service.CompanyServiceImpl.lambda$getAllCompanies$0 - Fetched 0 users for company id=5
+2025-06-16 19:47:14 [http-nio-8081-exec-6] DEBUG c.e.c.service.CompanyServiceImpl.lambda$getAllCompanies$0 - Mapping company with id=4, name=avb
+2025-06-16 19:47:14 [http-nio-8081-exec-6] DEBUG c.e.c.service.CompanyServiceImpl.lambda$getAllCompanies$0 - Fetched 0 users for company id=4
+2025-06-16 19:47:14 [http-nio-8081-exec-6] DEBUG c.e.c.service.CompanyServiceImpl.lambda$getAllCompanies$0 - Mapping company with id=3, name=Mohir Dev
+2025-06-16 19:47:14 [http-nio-8081-exec-6] DEBUG c.e.c.service.CompanyServiceImpl.lambda$getAllCompanies$0 - Fetched 1 users for company id=3
+2025-06-16 19:47:14 [http-nio-8081-exec-6] DEBUG c.e.c.service.CompanyServiceImpl.lambda$getAllCompanies$0 - Mapping company with id=1, name=PDP
+2025-06-16 19:47:14 [http-nio-8081-exec-6] DEBUG c.e.c.service.CompanyServiceImpl.lambda$getAllCompanies$0 - Fetched 2 users for company id=1
+2025-06-16 19:47:14 [http-nio-8081-exec-6] INFO  c.e.c.controller.CompanyController.getAllCompanies - Returning 4 companies
+2025-06-16 19:47:33 [http-nio-8081-exec-1] INFO  c.e.c.controller.CompanyController.getCompanyById - Received request to fetch company with users. ID=4
+2025-06-16 19:47:33 [http-nio-8081-exec-1] INFO  c.e.c.service.CompanyServiceImpl.getCompanyById - Fetching company with id: 4
+2025-06-16 19:47:33 [http-nio-8081-exec-1] DEBUG c.e.c.service.CompanyServiceImpl.getCompanyById - Company: avb, Users count: 0
+2025-06-16 19:47:33 [http-nio-8081-exec-1] INFO  c.e.c.controller.CompanyController.getCompanyById - Successfully fetched company 'avb'

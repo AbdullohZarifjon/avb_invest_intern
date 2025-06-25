@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -53,10 +54,10 @@ public class CompanyController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete company by ID")
-    public ResponseEntity<Void> deleteCompany(@PathVariable @Min(1) Integer id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCompany(@PathVariable @Min(1) Integer id) {
         log.warn("Delete request received for company ID={}", id);
         companyService.deleteCompanyById(id);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
